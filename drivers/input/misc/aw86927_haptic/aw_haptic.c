@@ -62,8 +62,6 @@
 
 #include <linux/pm_qos.h>
 
-#include <linux/mmhardware_others.h>
-
 #include  "ringbuffer.h"
 
 #include "aw_haptic.h"
@@ -73,11 +71,6 @@
 #include "aw86927.h"
 
 #define AW_DRIVER_VERSION		"v0.5.1.1"
-
-#ifdef CONFIG_MMHARDWARE_OTHER_DETECTION
-static DEFINE_MUTEX(haptic_lock);
-static int dev_cnt = 0;
-#endif
 
 /******************************************************
 
@@ -1628,23 +1621,6 @@ static int awinic_i2c_probe(struct i2c_client *i2c,
 		goto err_rb;
 
 	}
-
-#ifdef CONFIG_MMHARDWARE_OTHER_DETECTION
-	mutex_lock(&haptic_lock);
-	dev_cnt++;
-	mutex_unlock(&haptic_lock);
-	aw_err("%s: dev_cnt %d \n", __func__, dev_cnt);
-	switch (dev_cnt) {
-		case 1:
-			register_otherkobj_under_mmsysfs(MM_HW_HAPTIC_1, "haptic1");
-			break;
-		case 2:
-			register_otherkobj_under_mmsysfs(MM_HW_HAPTIC_2, "haptic2");
-			break;
-		default:
-			break;
-	}
-#endif
 
 	aw_info("%s probe completed successfully!\n", __func__);
 

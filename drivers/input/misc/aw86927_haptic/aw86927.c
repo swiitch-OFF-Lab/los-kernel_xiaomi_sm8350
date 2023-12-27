@@ -303,7 +303,6 @@ static int aw86927_haptic_read_lra_f0(struct aw86927 *aw86927)
 		aw_err("%s didn't get lra f0 because f0_reg value is 0!\n",
 			__func__);
 		aw86927->f0_cali_status = false;
-		aw86927->f0 = 0;
 		return ret;
 	}
 	aw86927->f0_cali_status = true;
@@ -976,7 +975,6 @@ static int aw86927_haptic_cont_get_f0(struct aw86927 *aw86927)
 		aw86927_haptic_read_lra_f0(aw86927);
 		aw86927_haptic_read_cont_f0(aw86927);
 	} else {
-		aw86927->f0 = 0;
 		aw_err("%s enter standby mode failed, stop reading f0!\n",
 			__func__);
 	}
@@ -4260,7 +4258,11 @@ static void aw86927_vibrator_work_routine(struct work_struct *work)
 		aw86927->effect_id, aw86927->state, aw86927->activate_mode,
 		aw86927->duration);
 	mutex_lock(&aw86927->lock);
-	aw86927_haptic_upload_lra(aw86927, AW86927_F0_CALI);
+	if (aw86927->effect_id == 10) {
+		aw86927_haptic_upload_lra(aw86927, AW86927_WRITE_ZERO);
+	} else {
+		aw86927_haptic_upload_lra(aw86927, AW86927_F0_CALI);
+	}
 	aw86927_haptic_stop(aw86927);
 	if (aw86927->state) {
 		if (aw86927->activate_mode ==
